@@ -4,7 +4,7 @@
 *   **Title:** Tinker Tailor LLM Spy: Reconstructing "Deleted" Chats & Hijacking Sessions from Chromium LevelDB Caches
 *   **Status:** Submitted / For Board Review
 *   **Session Type:** Briefings
-*   **Speaker:** Sapna (Lead Forensics Researcher, Verity Project)
+*   **Speaker:** Dr. Sapna Vikram Mewundi (Lead Forensics Researcher, Verity Project)
 *   **Tracks:** AI, ML, & Data Science; Threat Hunting & Incident Response
 *   **Format:** 40-Minute Briefings
 
@@ -99,7 +99,7 @@ Yes. The presentation will include a pre-recorded demo video showing:
 4.  The extraction of active session tokens to hijack the developer's session, followed by the verification of the evidence integrity using the Web Cryptography API.
 
 #### Provide the Names of the Speakers Presenting and Their Previous Speaking Experience.
-*   **Speaker:** Sapna (Lead Forensics Researcher, Verity Project)
+*   **Speaker:** Dr. Sapna Vikram Mewundi (Lead Forensics Researcher, Verity Project)
 *   **Previous Speaking Experience:** Regular presenter at local security meetups, DEF CON Groups, and contributor to open-source forensic tools. First-time speaker at Black Hat Briefings.
 
 #### Does Your Company/ Employer Provide a Solution to the Issue Addressed? If Yes, Please Provide Details.
