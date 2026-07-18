@@ -1,0 +1,5 @@
+Platform,Database Size (MB),Total Files,Write-Ahead Logs (.log),SSTables (.ldb/.sst),Carved Active Messages,Carved Deleted Messages,Carved Conversations,Avg Message Size (Chars),Carving Time (Sec)
+ChatGPT,1.902,7,1,1,0,697,16,1724.2,0.2245
+Claude AI,1.238,7,1,1,0,263,0,112.7,0.078
+GitHub Portal,0.12,7,1,1,0,0,0,0,0.0019
+Cursor Editor,1.352,197,0,0,0,363,6,352.4,0.01

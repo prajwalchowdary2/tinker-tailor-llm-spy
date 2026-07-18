@@ -1037,6 +1037,26 @@ dialog::backdrop {
   color: #1D4ED8;
 }
 
+.bot-cursor {
+  background: #FAF5FF;
+  color: #7E22CE;
+}
+
+.bot-vscode_copilot {
+  background: #F0F9FF;
+  color: #0369A1;
+}
+
+.bot-deepseek {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+
+.bot-perplexity {
+  background: #ECFDF5;
+  color: #047857;
+}
+
 /* ========================================================================
    DELETED BADGE
    ======================================================================== */
