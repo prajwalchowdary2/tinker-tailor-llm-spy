@@ -1,5 +1,5 @@
 ======================================================================
-VERITY FORENSICS — TOOL SUMMARY & OPEN-SOURCE REPOSITORY
+TINKER TAILOR LLM SPY — TOOL SUMMARY & OPEN-SOURCE REPOSITORY
 ======================================================================
 
 1. OFFICIAL GITHUB REPOSITORY LINK:
@@ -7,9 +7,9 @@ https://github.com/prajwalchowdary2/tinker-tailor-llm-spy
 
 ----------------------------------------------------------------------
 2. TOOL OVERVIEW:
-Verity is a specialized, zero-dependency, sub-50ms client-side forensic carving and threat-hunting framework designed to extract, reconstruct, and inspect Large Language Model (LLM) telemetry from volatile local storage cache files. 
+Tinker Tailor LLM Spy is a specialized, zero-dependency, sub-50ms client-side forensic carving and threat-hunting framework designed to extract, reconstruct, and inspect Large Language Model (LLM) telemetry from volatile local storage cache files. 
 
-While traditional forensic suites (like Autopsy or Magnet AXIOM) fail to interpret non-standard web cache database schemas, Verity reverse-engineers Chromium V8 serialization byte layouts, Claude TipTap draft keystroke buffers, and IDE JSONL agent transcripts.
+While traditional forensic suites (like Autopsy or Magnet AXIOM) fail to interpret non-standard web cache database schemas, Tinker Tailor LLM Spy reverse-engineers Chromium V8 serialization byte layouts, Claude TipTap draft keystroke buffers, and IDE JSONL agent transcripts.
 
 ----------------------------------------------------------------------
 3. KEY CAPABILITIES & FEATURES:

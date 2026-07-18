@@ -138,4 +138,4 @@ To prevent local AI telemetry leakage:
 
 ## 8. Conclusion
 
-This paper demonstrates that the "ephemeral" nature of deleted web and desktop AI sessions is a myth. By parsing raw V8 serialized objects from write-ahead logs and SSTables, investigators can fully recover deleted chat records. The zero-dependency, multi-profile python carving approach presented in **Verity** provides incident responders with a lightweight and cryptographically secure tool to investigate insider leaks and endpoint compromise.
+This paper demonstrates that the "ephemeral" nature of deleted web and desktop AI sessions is a myth. By parsing raw V8 serialized objects from write-ahead logs and SSTables, investigators can fully recover deleted chat records. The zero-dependency, multi-profile python carving approach presented in **Tinker Tailor LLM Spy** provides incident responders with a lightweight and cryptographically secure tool to investigate insider leaks and endpoint compromise.
