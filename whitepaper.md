@@ -2,7 +2,7 @@
 
 **Authors:**
 1. **Dr. Sapna V M** (Associate Professor, Dept of CSE, PES University, Bangalore) - sapnavm@pes.edu  
-2. **Prajwal Chowdary** (Student & Researcher, Dept of CSE, PES University, Bangalore) - prajwal@pes.edu  
+2. **Prajwal Chowdary** (Student & Researcher, Dept of CSE, PES University, Bangalore) - prajwalchowdary5@gmail.com  
 3. **Prasad H B** (Professor & Director of ISFCR, Dept of CSE, PES University, Bangalore) - prasadhb@pes.edu  
 
 **Organization:** Department of Computer Science & Engineering, PES University, Bangalore, India  
